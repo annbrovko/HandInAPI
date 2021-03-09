@@ -8,8 +8,8 @@ class App(npyscreen.NPSAppManaged):
     def onStart(self):
         #add forms to the application
         self.addForm('MAIN', FirstForm, name="Joke Machine")
-        #self.addForm('SECOND', SecondForm, name="second")
 
+# screen when starting the program
 class FirstForm(npyscreen.ActionFormMinimal):
   def create(self):
     self.add(npyscreen.TitleText, w_id="textfield", name="Enter a keyword: ")
@@ -17,7 +17,7 @@ class FirstForm(npyscreen.ActionFormMinimal):
     self.add(npyscreen.ButtonPress, name="Display liked jokes", when_pressed_function=self.like_btn)
 
   def generateJoke(self):
-    #connecting to the API and adding keyword from input
+    # connecting to the API through an url with added keyword from input
     keyword = self.get_widget("textfield").value
     url = "https://v2.jokeapi.dev/joke/Any?contains=" + keyword
     getJoke = (requests.get(url)).json()
@@ -29,47 +29,25 @@ class FirstForm(npyscreen.ActionFormMinimal):
     else:
       return getJoke['joke']
 
+# created global arraylist to be able to access to it
   global likedJokes
   likedJokes = []
 
   def btn_press(self):
+    x = self.generateJoke()
     #Generate a joke when the button is pressed
-    message = 'Here is a joke for you: \n.\n' + self.generateJoke() + '\n.\n.\n' + 'Did you like this joke?'
-  
-    #npyscreen.notify_confirm (message, title="Joke", wrap=True, wide=True, editw=1)
+    message = 'Here is a joke for you: \n.\n' + x + '\n.\n.\n' + 'Did you like this joke?'
     
     popup = npyscreen.notify_yes_no(message, title="Message", form_color='STANDOUT', wrap=True, editw = 0)
     if popup == True:
-      likedJokes.append(jokeID)
+      likedJokes.append(x)
 
   def on_ok(self):
     self.parentApp.switchForm(None)
   
   def like_btn(self):
-    message = str(likedJokes)
-    npyscreen.notify_confirm (message, title="like", wrap=True, wide=True, editw=1)
-    """
-    for x in range (likedJokes.len):
-      getLikedJoke = ((requests.get(url = "https://v2.jokeapi.dev/joke/Any?idRange=" + x)).json())
-      if getLikedJoke['type'] == 'twopart':
-        print (getLikedJoke['setup'] + "\n" + getLikedJoke['delivery'])
-      else:
-        print (getLikedJoke['joke'])
-    """
-
+    message = likedJokes
+    npyscreen.notify_confirm (message, title="Your liked jokes", wrap=True, wide=True, editw=1)
       
 app = App()
 app.run()
-
-"""
-class SecondForm(npyscreen.ActionFormMinimal):
-  def create(self):
-    self.add(npyscreen.ButtonPress, name="Like!", when_pressed_function=self.like_btn)
-    self.add(npyscreen.ButtonPress, name="Next joke", when_pressed_function=self.generateJoke)
-
-  def on_ok(self):
-    self.parentApp.change_form(None)
-
-  def btn_press(self):
-    npyscreen.notify_confirm("You pressed the button :-)", title="Button Press", wrap=True, wide=True, editw=1)
-    """
